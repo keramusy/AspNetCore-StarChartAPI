@@ -71,5 +71,68 @@ namespace StarChart.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost]
+        public IActionResult Create([FromBody]CelestialObject newObject)
+        {
+            _context.CelestialObjects.Add(newObject);
+            _context.SaveChanges();
+
+            return CreatedAtRoute("GetById", new {id = newObject.Id}, newObject);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] CelestialObject newObject)
+        {
+            var obj = _context.CelestialObjects.FirstOrDefault(co => co.Id == id);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            obj.Name = newObject.Name;
+            obj.OrbitalPeriod = newObject.OrbitalPeriod;
+            obj.OrbitedObjectId = newObject.OrbitedObjectId;
+
+            _context.CelestialObjects.Update(obj);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/{name}")]
+        public IActionResult RenameObject(int id, string name)
+        {
+            var obj = _context.CelestialObjects.FirstOrDefault(co => co.Id == id);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            obj.Name = name;
+
+            _context.CelestialObjects.Update(obj);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var obj = _context.CelestialObjects.Where(co => co.Id == id || co.OrbitedObjectId == id).ToList();
+
+            if (obj == null || !obj.Any())
+            {
+                return NotFound();
+            }
+
+            _context.CelestialObjects.RemoveRange(obj);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
     }
 }
